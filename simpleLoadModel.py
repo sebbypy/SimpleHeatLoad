@@ -54,7 +54,7 @@ class RoomLoadCalculator:
 
         deltaT=self.Tin-self.Tout
         
-        wallHeatLossArea,neighbourWallArea,groundHeatLossArea,roofHeatLossArea,neighbourFloorArea = self.computeHeatLossAreas()
+        wallHeatLossArea,neighbourWallArea,groundHeatLossArea,roofHeatLossArea,neighbourFloorArea = self.computeHeatLossAreas().values()
 
 
         if self.addNeighbourLosses:
@@ -137,7 +137,12 @@ class RoomLoadCalculator:
     
         
     
-        return wallHeatLossArea,neighbourWallArea,groundHeatLossArea,roofHeatLossArea,neighbourFloorArea
+    
+        return {'walls':wallHeatLossArea,
+                'neighbours':neighbourWallArea,
+                'ground':groundHeatLossArea,
+                'roof':roofHeatLossArea,
+                'neighbourfloor':neighbourFloorArea}
     
 
     def getVentilationFlows(self):
