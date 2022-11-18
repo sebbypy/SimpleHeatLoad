@@ -14,9 +14,10 @@ def roomSimpleLoad(floorArea,
                    Un=1.0,
                    LIR=0.2,
                    heatLossAreaEstimation='fromFloorArea',
-                   calculationMethod='simple',
+                   ventilationCalculationMethod='simple',
                    exposedPerimeter=0,
-                   onGround=False,underRoof=False,
+                   onGround=False,
+                   underRoof=False,
                    addNeighbourLosses=False,
                    neighbourPerimeter=0,
                    roomType = None,
@@ -41,7 +42,7 @@ def roomSimpleLoad(floorArea,
 
     insideDeltaT = max(0,Tin-neighbourT)
 
-    outsideAirVentilationFlowRate,insideAirVentilationFlowRate = getVentilationFlows(vSystem,floorArea,wallHeight,calculationMethod='simple',roomType=None)    
+    outsideAirVentilationFlowRate,insideAirVentilationFlowRate = getVentilationFlows(vSystem,floorArea,wallHeight,ventilationCalculationMethod,roomType=None)    
 
 
     ventilationHeatLoss  = 0.34*(outsideAirVentilationFlowRate)*deltaT + 0.34*(insideAirVentilationFlowRate)*insideDeltaT
