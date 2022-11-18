@@ -1,0 +1,384 @@
+<head>
+<title>Simple heat load calculation</title>
+<script src="https://cdn.jsdelivr.net/pyodide/v0.17.0/full/pyodide.js"></script>
+<!--form  { display: table;      }
+p     { display: table-row;  }
+
+label { display: table-cell; padding-right:10px;}
+input { display: table-cell; }
+-->
+
+<link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet'>
+<style>
+body, .topregion
+{
+    font-family: 'Roboto';
+	font-size: 14;
+}
+
+
+.topregion{
+	width=100%;
+	height:50px;
+	background-color:  #00bfb6;
+	color: white;
+	line-height: 50px;
+	font-size: 20;
+	font-weight: bold;
+	padding: 10px;
+}
+
+.main{
+	padding: 10px;
+	}
+
+.rendered-form, .results-table
+{
+display: table;
+}
+.formbuilder-number, .formbuilder-select, .formbuilder-checkbox-group, .resdiv
+{
+display: table-row;
+}
+
+input[type=number], input[type=select], .formbuilder-number-label, .formbuilder-select-label, .formbuilder-checkbox-group-label, .checkbox-group, .result-label, .result-unit, .result-value
+{
+display: table-cell;
+}
+
+.formbuilder-number-label, .formbuilder-select-label, .formbuilder-checkbox-group-label, .result-label, .result-unit, .result-value
+{
+padding-right:10px;
+}
+
+.result{
+font-size:14px;
+font-weight:bold;
+}
+
+
+</style>
+
+</head>
+
+<body>
+
+<div class="topregion">
+Calcul de charge thermique simplifié
+</div>
+
+<div class="main" id="main">
+<!--<h1></h1>-->
+
+
+<div class="rendered-form">
+    <div class="formbuilder-number form-group field-number-16686921028830">
+        <label for="number-16686921028830" class="formbuilder-number-label">Température intérieure</label>
+        <input type="number" class="form-control" name="number-16686921028830" access="false" value="18" min="0" id="Tin">
+    </div>
+    <div class="formbuilder-number form-group field-number-16686921028831">
+        <label for="number-16686921028831" class="formbuilder-number-label">Température intérieure</label>
+        <input type="number" class="form-control" name="number-16686921028831" access="false" value="-7" min="-15" id="Tout">
+    </div>
+
+    <div class="formbuilder-number form-group field-number-1668692102883">
+        <label for="number-1668692102883" class="formbuilder-number-label">Floor Area
+        </label>
+        <input type="number" class="form-control" name="number-1668692102883" access="false" value="10" min="0" id="floorArea">
+    </div>
+    <div class="formbuilder-number form-group field-number-1668692108597">
+        <label for="number-1668692108597" class="formbuilder-number-label">Uw</label>
+        <input type="number" class="form-control" name="number-1668692108597" access="false" value="0.24" min="0" step="0.01" id="Uw">
+    </div>
+    <div class="formbuilder-number form-group field-number-1668692185653">
+        <label for="number-1668692185653" class="formbuilder-number-label">Ug</label>
+        <input type="number" class="form-control" name="number-1668692185653" access="false" value="0.24" step="0.01" id="Ug">
+    </div>
+    <div class="formbuilder-number form-group field-number-1668692200478">
+        <label for="number-1668692200478" class="formbuilder-number-label">Ur</label>
+        <input type="number" class="form-control" name="number-1668692200478" access="false" value="0.24" min="0" step="0.01" id="Ur">
+    </div>
+    <div class="formbuilder-select form-group field-select-1668692083702">
+        <label for="select-1668692083702" class="formbuilder-select-label">Ventilation system</label>
+        <select class="form-control" name="select-1668692083702" id="vSys">
+            <option value="C" selected="true" id="sysC">C</option>
+            <option value="D" id="sysD">D</option>
+        </select>
+    </div>
+	<div class="formbuilder-select form-group field-select-1668692083702">
+        <label for="select-1668692083702" class="formbuilder-select-label">Calcul de la ventilation</label>
+        <select class="form-control" name="select-1668692083702" id="ventilationCalculationMethod" onchange="changeVentilationMethod()">
+            <option value="simple" selected="true" id="sysC">Simplifié</option>
+            <option value="NBN-D-50-001" id="sysD">NBN-D-50-001</option>
+        </select>
+    </div>
+    <div class="formbuilder-select form-group field-select-1668692809196">
+        <label for="select-1668692809196" class="formbuilder-select-label">Type d'espace</label>
+        <select class="form-control" name="select-1668692809196" id="roomType" value="None">
+            <option value="Living" id="select-1668692809196-0">Living</option>
+            <option value="Kitchen" id="select-1668692809196-1">Cuisine</option>
+            <option value="Bathroom" id="select-1668692809196-2">SDB</option>
+            <option value="Bedroom" id="select-1668692809196-3">Chambre, bureau, etc</option>
+            <option value="Laundry" id="select-1668692809196-4">Buanderie</option>
+            <option value="Toilet" id="select-1668692809196-5">WC</option>
+            <option value="None" selected="true" id="select-1668692809196-6">Par défaut</option>
+        </select>
+    </div>
+    <div class="formbuilder-number form-group field-number-1668692254124">
+        <label for="number-1668692254124" class="formbuilder-number-label">v50</label>
+        <input type="number" class="form-control" name="number-1668692254124" access="false" value="6" min="0" id="v50">
+    </div>
+	<div class="formbuilder-checkbox-group form-group field-checkbox-group-1668692493723">
+        <label for="checkbox-group-1668692493723" class="formbuilder-checkbox-group-label">Pertes vers les locaux voisins?</label>
+        <div class="checkbox-group">
+            <div class="formbuilder-checkbox">
+                <input name="checkbox-group-1668692493723[]" access="false" id="neighbourLosses" type="checkbox" onchange="changeNeighbour()">
+                <label for="checkbox-group-1668692493723-0"></label>
+            </div>
+        </div>
+    </div>
+    <div class="formbuilder-number form-group field-number-1668692274169">
+        <label for="number-1668692274169" class="formbuilder-number-label">U interne</label>
+        <input type="number" class="form-control" name="number-1668692274169" access="false" value="1" min="0.1" id="Un">
+    </div>
+    <div class="formbuilder-select form-group field-select-1668692297847">
+        <label for="select-1668692297847" class="formbuilder-select-label">Calcul des surfaces</label>
+        <select class="form-control" name="select-1668692297847" id="exposedPerimeter" onchange="updateSurfaceMethod()">
+            <option value="fromFloorArea" selected="true" id="select-1668692297847-0">Depuis surface au sol</option>
+            <option value="fromExposedPerimeter" id="select-1668692297847-1">Depuis périmètre exposé</option>
+        </select>
+    </div>
+    <div class="formbuilder-number form-group field-number-1668692368477">
+        <label for="number-1668692368477" class="formbuilder-number-label">Périmètre exposé à l'extérieur           
+        </label>
+        <input type="number" class="form-control" name="number-1668692368477" access="false" value="0" min="0" id="outsideExposedPerimeter">
+    </div>
+    <div class="formbuilder-number form-group field-number-1668692370873">
+        <label for="number-1668692370873" class="formbuilder-number-label">Périmètre vers locaux voisins
+            
+        </label>
+        <input type="number" class="form-control" name="number-1668692370873" access="false" value="0" min="0" id="neighbourExposedPerimeter">
+    </div>
+    <div class="formbuilder-checkbox-group form-group field-checkbox-group-1668692493723">
+        <label for="checkbox-group-1668692493723" class="formbuilder-checkbox-group-label">Position dans le bâtiment
+            <span class="tooltip-element" tooltip="Pour un plein pied, cliquer les 2">?</span></label>
+        <div class="checkbox-group">
+            <div class="formbuilder-checkbox">
+                <input name="checkbox-group-1668692493723[]" access="false" id="onGround" value="onGround" type="checkbox">
+                <label for="checkbox-group-1668692493723-0">Rez de chaussée (en contact avec le sol ou la cave)</label>
+            </div>
+            <div class="formbuilder-checkbox">
+                <input name="checkbox-group-1668692493723[]" access="false" id="underRoof" value="underRoof" type="checkbox">
+                <label for="checkbox-group-1668692493723-1">Dernier étage (en contact avec la toiture/les combles)</label>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function changeVentilationMethod(){
+
+	method=document.getElementById("ventilationCalculationMethod").value
+	
+	if (method=="NBN-D-50-001"){
+		document.getElementById("roomType").disabled=false
+	}
+	else{
+		document.getElementById("roomType").disabled=true
+	}
+}
+
+
+function updateSurfaceMethod(){
+
+	method = document.getElementById("exposedPerimeter").value
+	
+	if (method=='fromFloorArea'){
+		document.getElementById("outsideExposedPerimeter").disabled=true
+		document.getElementById("neighbourExposedPerimeter").disabled=true
+		}
+	else{
+		document.getElementById("outsideExposedPerimeter").disabled=false
+		document.getElementById("neighbourExposedPerimeter").disabled=false
+		}
+}
+
+function changeNeighbour(){
+	if (document.getElementById("neighbourLosses").checked){
+		document.getElementById("Un").value=1
+		document.getElementById("Un").disabled=false
+		}
+	else{
+		document.getElementById("Un").value=0
+		document.getElementById("Un").disabled=true
+		}
+}
+		
+		
+async function loadPythonCode(){
+	console.log("Loading python code")
+	await loadPyodide({
+          indexURL : "https://cdn.jsdelivr.net/pyodide/v0.17.0/full/"
+        });
+	await pyodide.loadPackage('numpy');
+
+	pyodide.runPython(await (await fetch('https://raw.githubusercontent.com/sebbypy/SimpleHeatLoad/main/simpleLoadModel.py')).text());
+	console.log("DONE")
+
+}
+
+function addResultSubTitle(subtitle){
+
+	node = document.getElementById("subtitle-"+subtitle)
+	
+	if (node==null){
+		node = document.createElement("h4")
+		node.setAttribute("id","subtitle-"+subtitle)
+		node.innerHTML = subtitle
+		table=document.getElementById("results-table")
+		table.appendChild(node);
+		}
+}
+
+function addPowerResult(value,key){
+	addResultField(value,key,'W')
+	}
+	
+function addAreaResult(value,key){
+	addResultField(value,key,'m²')
+	}
+function addFlowResult(value,key){
+	addResultField(value,key,'m³/h')
+	}
+
+function addAllResults(result,areas,flowrates){
+	
+	addResultSubTitle("Puissances");
+	result.forEach(addPowerResult);
+	addResultSubTitle("Surfaces");
+	areas.forEach(addAreaResult);
+
+	addResultSubTitle("Débits");
+	flowrates.forEach(addFlowResult);
+}
+
+function addResultField(value,key,unit){
+
+	valueE = document.getElementById("result-value-"+key);
+	
+	if (valueE==null){
+		node = document.createElement("div")
+		node.setAttribute("class","resdiv");
+		node.setAttribute("id","resdiv-"+key);
+		document.getElementById('results-table').appendChild(node)
+		
+		labelE = document.createElement("div")
+		labelE.setAttribute("class","result-label");
+		labelE.setAttribute("id","result-label-"+key);
+		labelE.innerHTML = key
+	
+		valueE = document.createElement("div")
+		valueE.setAttribute("class","result-value")
+		valueE.setAttribute("id","result-value-"+key)
+		
+		unitE = document.createElement("span")
+		unitE.setAttribute("class","result-unit")
+		unitE.setAttribute("id","result-unit-"+key)
+		unitE.innerHTML = unit
+
+		node.appendChild(labelE)
+		node.appendChild(valueE)
+		node.appendChild(unitE)
+	}
+	valueE.innerHTML = value.toFixed(1)
+	
+
+}
+
+
+async function compute(){
+
+Tin = 	parseFloat(document.getElementById("Tin").value)
+Tout = 	parseFloat(document.getElementById("Tout").value)
+
+floorArea = parseFloat(document.getElementById("floorArea").value)
+Uw = parseFloat(document.getElementById("Uw").value)
+Ur = parseFloat(document.getElementById("Ug").value)
+Ug = parseFloat(document.getElementById("Ur").value)
+v50 = parseFloat(document.getElementById("v50").value)
+
+Un = parseFloat(document.getElementById("Un").value)
+
+vSys = document.getElementById("vSys").value
+ventilationCalculationMethod = document.getElementById("ventilationCalculationMethod").value
+roomType = document.getElementById("roomType").value
+
+
+pe = parseFloat(document.getElementById("outsideExposedPerimeter").value)
+pn = parseFloat(document.getElementById("neighbourExposedPerimeter").value)
+
+countNeighbourLosses = document.getElementById("neighbourLosses").checked
+
+onGround = document.getElementById("onGround").checked
+underRoof = document.getElementById("underRoof").checked
+
+areaCalculationMethod = document.getElementById("exposedPerimeter").value
+
+
+await pyodide.runPython(`
+
+import js
+
+
+calculator = RoomLoadCalculator(js.floorArea,js.Uw,js.Ur,js.Ug,js.vSys,js.v50,js.Tin,js.Tout,
+						neighbourT=18,
+						LIR=0.2,
+						heatLossAreaEstimation=js.areaCalculationMethod,
+						exposedPerimeter=js.pe,
+						onGround=js.onGround,underRoof=js.underRoof,
+						addNeighbourLosses=js.countNeighbourLosses,
+						neighbourPerimeter=js.pn,
+						roomType=js.roomType,
+						returnDetail=True,
+						ventilationCalculationMethod=js.ventilationCalculationMethod)
+    
+result = calculator.compute()
+
+areas = calculator.computeHeatLossAreas()
+
+flowrates = calculator.getVentilationFlows()
+
+    
+print(result)
+`)
+	
+var result = pyodide.globals.get('result').toJs();
+var areas = pyodide.globals.get('areas').toJs();
+var flowrates = pyodide.globals.get('flowrates').toJs();
+
+
+document.getElementById("result").innerHTML=result.get('totalHeatLoss').toFixed(0);
+
+
+addAllResults(result,areas,flowrates)
+
+	
+}
+
+changeNeighbour()
+updateSurfaceMethod()
+changeVentilationMethod()
+
+loadPythonCode()
+</script>
+
+<button onclick="compute()">Calculer</button>
+<h2>Charge thermique <span id="result"></span> [W]</h2>
+
+<div id="results-table" class="results-table">
+<h3>Résultats détaillés</h3>
+</div>
+
+</div>
+
+</body>
