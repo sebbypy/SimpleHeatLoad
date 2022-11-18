@@ -208,7 +208,7 @@ class RoomLoadCalculator:
             nomFlow = max(nomFlow,bounds[self.roomType]['min'])
 
 
-            if self.roomType in ['Living','Bedroom','Bureau']:
+            if self.roomType in ['Living','Bedroom','Bureau',None,'None']:
                 flowFromOutside = nomFlow 
                 flowFromInside = 0
                 if self.vSystem == 'D':
