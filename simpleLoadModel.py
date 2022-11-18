@@ -156,7 +156,14 @@ def getVentilationFlows(vSystem,floorArea,wallHeight,calculationMethod='simple',
                        'max':150},
                   None:{
                       'min':0,
-                      'max':150}
+                      'max':150},
+                  'None':{
+                      'min':0,
+                      'max':150},
+                  'Toilet':{
+                       'min':25,
+                       'max':25
+                       }
                   }
                       
         
