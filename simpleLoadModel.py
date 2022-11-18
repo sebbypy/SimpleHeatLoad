@@ -42,7 +42,7 @@ def roomSimpleLoad(floorArea,
 
     insideDeltaT = max(0,Tin-neighbourT)
 
-    outsideAirVentilationFlowRate,insideAirVentilationFlowRate = getVentilationFlows(vSystem,floorArea,wallHeight,ventilationCalculationMethod,roomType=None)    
+    outsideAirVentilationFlowRate,insideAirVentilationFlowRate = getVentilationFlows(vSystem,floorArea,wallHeight,ventilationCalculationMethod,roomType=roomType)    
 
 
     ventilationHeatLoss  = 0.34*(outsideAirVentilationFlowRate)*deltaT + 0.34*(insideAirVentilationFlowRate)*insideDeltaT
@@ -151,6 +151,9 @@ def getVentilationFlows(vSystem,floorArea,wallHeight,calculationMethod='simple',
                   'Laundry':
                       {'min':50,
                        'max':75},
+                  'Bathroom':
+                      {'min':50,
+                       'max':150},
                   None:{
                       'min':0,
                       'max':150}
@@ -173,6 +176,7 @@ def getVentilationFlows(vSystem,floorArea,wallHeight,calculationMethod='simple',
             flowFromOutside = 0
             flowFromInside = nomFlow
        
+
 
         return flowFromOutside,flowFromInside
 
