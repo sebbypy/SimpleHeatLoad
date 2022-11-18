@@ -19,7 +19,8 @@ def roomSimpleLoad(floorArea,
                    addNeighbourLosses=False,
                    neighbourPerimeter=0,
                    roomType = None,
-                   wallHeight=2.7):
+                   wallHeight=2.7,
+                   returnDetail=False):
 
 
     deltaT=Tin-Tout
@@ -50,9 +51,20 @@ def roomSimpleLoad(floorArea,
     
     totalHeatLoss = transmissionHeatLoss + ventilationHeatLoss + infiltrationHeatLoss + neighbourLosses
 
-
+    returnDict = {}
     
-    return totalHeatLoss
+    returnDict['totalHeatLoss'] = totalHeatLoss
+    returnDict['transmissionHeatLoss']=transmissionHeatLoss
+    returnDict['ventilationHeatLoss']=ventilationHeatLoss
+    returnDict['infilstrationHeatLoss']=infiltrationHeatLoss
+    returnDict['neighbourLosses']=neighbourLosses
+    
+    if returnDetail:
+        return returnDict
+    
+    else:
+        
+        return totalHeatLoss
 
 
 
