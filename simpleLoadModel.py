@@ -67,7 +67,7 @@ class RoomLoadCalculator:
 
         insideDeltaT = max(0,self.Tin-self.neighbourT)
 
-        outsideAirVentilationFlowRate,insideAirVentilationFlowRate = self.getVentilationFlows()
+        outsideAirVentilationFlowRate,insideAirVentilationFlowRate = self.getVentilationFlows().values()
         
 
         ventilationHeatLoss  = 0.34*(outsideAirVentilationFlowRate)*deltaT + 0.34*(insideAirVentilationFlowRate)*insideDeltaT
@@ -167,7 +167,8 @@ class RoomLoadCalculator:
             flow = volume*Vach
 
 
-            return flow,0    
+            return {'flow from outside':flow,
+                    'flow from neighbour zones':0}
 
 
         if self.ventilationCalculationMethod=='NBN-D-50-001':
@@ -219,16 +220,16 @@ class RoomLoadCalculator:
            
 
 
-            return flowFromOutside,flowFromInside
+            return {'flow from outside':flowFromOutside,
+                    'flow from neighbour zones':flowFromInside}
 
 
         else:    
-            return 0,0
+            return {'flow from outside':0,
+                    'flow from neighbour zones':0}
 
         
-        """to fill"""
         
-        return
 
 
 
