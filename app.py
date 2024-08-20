@@ -6,7 +6,6 @@ from simpleLoadModel import RoomLoadCalculator
 def main():
     st.title("Multi-Room Heat Loss Calculator")
 
-    # Building-Level Parameters
     st.sidebar.header("Building-Level Parameters")
     with st.sidebar.expander("Basic Parameters"):
         uw = st.number_input("Wall U-value (W/m²K)", min_value=0.0, value=1.0, help="U-value of the walls.")
@@ -36,7 +35,6 @@ def main():
         add_neighbour_losses = st.checkbox("Add Neighbour Losses", value=False,
                                            help="Include heat loss to neighbours.")
 
-    # Number of Rooms Input
     num_rooms = st.sidebar.number_input("Number of Rooms", min_value=1, value=1)
 
     # Main Screen: Room-Specific Parameters
@@ -91,7 +89,7 @@ def main():
                 un=un,
                 lir=lir,
                 heat_loss_area_estimation=heat_loss_area_estimation,
-                ventilation_calculation_method='simple',  # Assuming 'simple' for all rooms; can be adjusted if needed
+                ventilation_calculation_method=ventilation_calculation_method,
                 exposed_perimeter=room["exposed_perimeter"],
                 on_ground=room["on_ground"],
                 under_roof=room["under_roof"],
