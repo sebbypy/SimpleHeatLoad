@@ -102,6 +102,8 @@ class RoomLoadCalculator:
     def compute_heat_loss_areas(self) -> Dict[str, float]:
         if self.heat_loss_area_estimation == 'fromFloorArea':
             side = np.sqrt(self.floor_area)
+            # maybe we should make the * 2  an input parameter depending on the room type like row house *1
+            # towards outside while in detached house typically *2
             wall_heat_loss_area = side * self.wall_height * 2  # 2 walls toward outside
             neighbour_wall_area = side * self.wall_height * 2  # 2 neighbour walls
         elif self.heat_loss_area_estimation == 'fromExposedPerimeter':
