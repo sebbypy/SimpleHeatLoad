@@ -7,19 +7,20 @@ def main():
     st.title("Multi-Room Heat Loss Calculator")
 
     st.sidebar.header("Building-Level Parameters")
-    with st.sidebar.expander("Basic Parameters"):
+    with st.sidebar.expander("Building Settings"):
         uw = st.number_input("Wall U-value (W/m²K)", min_value=0.0, value=1.0, help="U-value of the walls.")
         u_roof = st.number_input("Roof U-value (W/m²K)", min_value=0.0, value=0.2, help="U-value of the roof.")
         u_ground = st.number_input("Ground U-value (W/m²K)", min_value=0.0, value=0.3,
-                                   help="U-value of the ground.")
+                                   help="U-value of the ground floor.")
         tout = st.number_input("Outdoor Temperature (°C)", value=-7.0,
                                help="Outdoor temperature during heating season.")
         heat_loss_area_estimation = st.selectbox("Heat Loss Area Estimation",
-                                                 options=["fromFloorArea", "fromExposedPerimeter"])
+                                                 options=["fromFloorArea", "fromExposedPerimeter"],
+                                                 help="Method for estimating the heat losses.")
     with st.sidebar.expander("Ventilation Settings"):
         ventilation_calculation_method = st.selectbox("Ventilation Calculation Method",
                                                       options=["simple", "NBN-D-50-001"],
-                                                      help="Method used for calculating ventilation heat loss.")
+                                                      help="Method used for calculating ventilation heat losses.")
         v_system = st.selectbox("Ventilation System", options=["C", "D"], help="Type of ventilation system.")
         v50 = st.number_input("Air Tightness (v50)", min_value=0.0, value=6.0,
                               help="Air leakage rate at 50 Pa (ACH).")
@@ -100,7 +101,7 @@ def main():
                 return_detail=return_detail
             )
             result = calculator.compute()
-
+            # for the multi-room show in a table for every room the heat loss and give the total heat loss building
             if return_detail:
                 st.subheader("Total Heat Loss")
                 st.write(f"{result['totalHeatLoss']:.2f} W")
