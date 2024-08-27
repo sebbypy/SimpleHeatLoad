@@ -9,6 +9,8 @@ class RoomLoadCalculator:
                  u_roof: float,
                  u_ground: float,
                  v_system: str,
+                 wall_outside: float = 2.0,
+                 wall_neighbor: float = 2.0,
                  v50: float = 6,
                  tin: float = 20,
                  tout: float = -7,
@@ -30,6 +32,8 @@ class RoomLoadCalculator:
         self.u_roof = u_roof
         self.u_ground = u_ground
         self.v_system = v_system
+        self.wall_outside = wall_outside
+        self.wall_neighbor = wall_neighbor
         self.v50 = v50
         self.tin = tin
         self.tout = tout
@@ -104,8 +108,8 @@ class RoomLoadCalculator:
             side = np.sqrt(self.floor_area)
             # maybe we should make the * 2  an input parameter depending on the room type like row house *1
             # towards outside while in detached house typically *2
-            wall_heat_loss_area = side * self.wall_height * 2  # 2 walls toward outside
-            neighbour_wall_area = side * self.wall_height * 2  # 2 neighbour walls
+            wall_heat_loss_area = side * self.wall_height * self.wall_outside  # 2 walls toward outside
+            neighbour_wall_area = side * self.wall_height * self.wall_neighbor  # 2 neighbour walls
         elif self.heat_loss_area_estimation == 'fromExposedPerimeter':
             wall_heat_loss_area = self.exposed_perimeter * self.wall_height
             neighbour_wall_area = self.neighbour_perimeter * self.wall_height
