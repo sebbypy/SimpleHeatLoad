@@ -1,55 +1,33 @@
+import dataclasses
+
 import numpy as np
 from typing import Dict, Union, Optional
 
-
+@dataclasses.dataclass
 class RoomLoadCalculator:
-    def __init__(self,
-                 floor_area: float,
-                 uw: float,
-                 u_roof: float,
-                 u_ground: float,
-                 v_system: str,
-                 wall_outside: float = 2.0,
-                 wall_neighbor: float = 2.0,
-                 v50: float = 6,
-                 tin: float = 20,
-                 tout: float = -7,
-                 neighbour_t: float = 18,
-                 un: float = 1.0,
-                 lir: float = 0.2,
-                 heat_loss_area_estimation: str = 'fromFloorArea',
-                 ventilation_calculation_method: str = 'simple',
-                 exposed_perimeter: float = 0,
-                 on_ground: bool = False,
-                 under_roof: bool = False,
-                 add_neighbour_losses: bool = False,
-                 neighbour_perimeter: float = 0,
-                 room_type: Optional[str] = None,
-                 wall_height: float = 2.7,
-                 return_detail: bool = False):
-        self.floor_area = floor_area
-        self.uw = uw
-        self.u_roof = u_roof
-        self.u_ground = u_ground
-        self.v_system = v_system
-        self.wall_outside = wall_outside
-        self.wall_neighbor = wall_neighbor
-        self.v50 = v50
-        self.tin = tin
-        self.tout = tout
-        self.neighbour_t = neighbour_t
-        self.un = un
-        self.lir = lir
-        self.heat_loss_area_estimation = heat_loss_area_estimation
-        self.ventilation_calculation_method = ventilation_calculation_method
-        self.exposed_perimeter = exposed_perimeter
-        self.on_ground = on_ground
-        self.under_roof = under_roof
-        self.add_neighbour_losses = add_neighbour_losses
-        self.neighbour_perimeter = neighbour_perimeter
-        self.room_type = room_type
-        self.wall_height = wall_height
-        self.return_detail = return_detail
+    floor_area: float
+    uw: float
+    u_roof: float
+    u_ground: float
+    v_system: str
+    wall_outside: float = 2.0
+    wall_neighbor: float = 2.0
+    v50: float = 6.0
+    tin: float = 20.0
+    tout: float = -7.0
+    neighbour_t: float = 18.0
+    un: float = 1.0
+    lir: float = 0.2
+    heat_loss_area_estimation: str = 'fromFloorArea'
+    ventilation_calculation_method: str = 'simple'
+    exposed_perimeter: float = 0.0
+    on_ground: bool = False
+    under_roof: bool = False
+    add_neighbour_losses: bool = False
+    neighbour_perimeter: float = 0.0
+    room_type: Optional[str] = None
+    wall_height: float = 2.7
+    return_detail: bool = False
 
     def compute(self) -> Union[float, Dict[str, float]]:
         delta_t = self.tin - self.tout
@@ -106,10 +84,8 @@ class RoomLoadCalculator:
     def compute_heat_loss_areas(self) -> Dict[str, float]:
         if self.heat_loss_area_estimation == 'fromFloorArea':
             side = np.sqrt(self.floor_area)
-            # maybe we should make the * 2  an input parameter depending on the room type like row house *1
-            # towards outside while in detached house typically *2
-            wall_heat_loss_area = side * self.wall_height * self.wall_outside  # 2 walls toward outside
-            neighbour_wall_area = side * self.wall_height * self.wall_neighbor  # 2 neighbour walls
+            wall_heat_loss_area = side * self.wall_height * self.wall_outside
+            neighbour_wall_area = side * self.wall_height * self.wall_neighbor
         elif self.heat_loss_area_estimation == 'fromExposedPerimeter':
             wall_heat_loss_area = self.exposed_perimeter * self.wall_height
             neighbour_wall_area = self.neighbour_perimeter * self.wall_height
