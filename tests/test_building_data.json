@@ -1,0 +1,11 @@
+{
+    "building": {
+        "rooms": [
+            {"floor_area": 20.7, "tin": 20, "on_ground": true, "under_roof": false, "room_type": "living"},
+            {"floor_area": 21.0, "tin": 20, "on_ground": true, "under_roof": true, "room_type": "kitchen"},
+            {"floor_area": 11.8, "tin": 24, "on_ground": false, "under_roof": true, "room_type": "bathroom"},
+            {"floor_area": 16.5, "tin": 20, "on_ground": false, "under_roof": true, "room_type": "bedroom"},
+            {"floor_area": 12.5, "tin": 20, "on_ground": false, "under_roof": true, "room_type": "bedroom"}
+        ]
+    }
+}
