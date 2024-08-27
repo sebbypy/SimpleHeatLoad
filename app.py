@@ -1,3 +1,4 @@
+import pandas as pd
 import streamlit as st
 
 from simpleLoadModel import RoomLoadCalculator
@@ -37,84 +38,99 @@ def main():
                                            help="Include heat loss to neighbours.")
 
     num_rooms = st.sidebar.number_input("Number of Rooms", min_value=1, value=1)
+    room_type = ['Living', 'Kitchen', 'Bedroom', 'Laundry', 'Bathroom', 'Toilet', None]
 
-    # Main Screen: Room-Specific Parameters
-    room_data = []
+    if heat_loss_area_estimation == 'fromFloorArea':
+        room_data = pd.DataFrame({
+            "Room #": [i + 1 for i in range(num_rooms)],
+            "Indoor Temp (°C)": [20.0] * num_rooms,
+            "Floor Area (m²)": [50.0] * num_rooms,
+            "Walls external": [2] * num_rooms,
+            "Walls internal": [2] * num_rooms,
+            "Room Type": ["Living"] * num_rooms,
+            "On Ground": [False] * num_rooms,
+            "Under Roof": [False] * num_rooms
+        })
+    else:
+        room_data = pd.DataFrame({
+            "Room #": [i + 1 for i in range(num_rooms)],
+            "Indoor Temp (°C)": [20.0] * num_rooms,
+            "Exposed Perimeter (m)": [20.0] * num_rooms,
+            "Neighbour Perimeter (m)": [10.0] * num_rooms,
+            "Room Type": ["Living"] * num_rooms,
+            "On Ground": [False] * num_rooms,
+            "Under Roof": [False] * num_rooms
+        })
 
     st.header("Room-Specific Parameters")
 
-    for i in range(num_rooms):
-        st.subheader(f"Room {i + 1} Settings")
-
-        tin = st.number_input(f"Room {i + 1} - Indoor Temperature (°C)", value=20.0)
-
-        if heat_loss_area_estimation == 'fromFloorArea':
-            floor_area = st.number_input(f"Room {i + 1} - Floor Area (m²)", min_value=0.0, value=50.0)
-            exposed_perimeter = 0.0
-            neighbour_perimeter = 0.0
-        else:
-            exposed_perimeter = st.number_input(f"Room {i + 1} - Exposed Perimeter (m)", value=0.0)
-            neighbour_perimeter = st.number_input(f"Room {i + 1} - Neighbour Perimeter (m)", value=0.0)
-            floor_area = 0.0
-
-        room_type = st.selectbox(f"Room {i + 1} - Room Type",
-                                 options=[None, "Living", "Kitchen", "Bedroom", "Laundry", "Bathroom", "Toilet"])
-        on_ground = st.checkbox(f"Room {i + 1} - On Ground", value=False)
-        under_roof = st.checkbox(f"Room {i + 1} - Under Roof", value=False)
-
-        room_data.append({
-            "floor_area": floor_area,
-            "tin": tin,
-            "exposed_perimeter": exposed_perimeter,
-            "neighbour_perimeter": neighbour_perimeter,
-            "room_type": room_type,
-            "on_ground": on_ground,
-            "under_roof": under_roof,
-        })
-
-    # Calculate Button
+    edited_room_data = st.data_editor(
+        room_data,
+        key='editable_table',
+        num_rows="dynamic",
+        use_container_width=True,
+        column_config={
+            'Room #': st.column_config.NumberColumn("Room #", format="%d", width=100),
+            'Indoor Temp (°C)': st.column_config.NumberColumn("Indoor Temp (°C)", format="%.1f", width=150),
+            'Floor Area (m²)': st.column_config.NumberColumn("Floor Area (m²)", format="%.2f", width=150),
+            'Exposed Perimeter (m)': st.column_config.NumberColumn("Exposed Perimeter (m)", format="%.2f", width=150),
+            'Neighbour Perimeter (m)': st.column_config.NumberColumn("Neighbour Perimeter (m)", format="%.2f",
+                                                                     width=150),
+            'Room Type': st.column_config.SelectboxColumn("Room Type",
+                                                          options=room_type, width=150),
+            'On Ground': st.column_config.CheckboxColumn("On Ground", width=100),
+            'Under Roof': st.column_config.CheckboxColumn("Under Roof", width=100),
+            'Walls external': st.column_config.NumberColumn("Walls external", format="%.2f", width=150, min_value=0.0, max_value=4.0, step=1.0),
+            'Walls internal': st.column_config.NumberColumn("Walls internal", format="%.2f", width=150, min_value=0.0, max_value=4.0, step=1.0),
+        }
+    )
     if st.sidebar.button("Calculate Heat Loss for All Rooms"):
-        for idx, room in enumerate(room_data):
-            st.subheader(f"Room {idx + 1} Heat Loss Calculation")
-
+        room_results = []
+        for idx, row in edited_room_data.iterrows():
             calculator = RoomLoadCalculator(
-                floor_area=room["floor_area"],
+                floor_area=row.get("Floor Area (m²)", 0.0),
                 uw=uw,
                 u_roof=u_roof,
                 u_ground=u_ground,
                 v_system=v_system,
                 v50=v50,
-                tin=room["tin"],
+                tin=row["Indoor Temp (°C)"],
                 tout=tout,
                 neighbour_t=neighbour_t,
                 un=un,
                 lir=lir,
                 heat_loss_area_estimation=heat_loss_area_estimation,
                 ventilation_calculation_method=ventilation_calculation_method,
-                exposed_perimeter=room["exposed_perimeter"],
-                on_ground=room["on_ground"],
-                under_roof=room["under_roof"],
+                exposed_perimeter=row.get("Exposed Perimeter (m)", 0.0),
+                on_ground=row["On Ground"],
+                under_roof=row["Under Roof"],
                 add_neighbour_losses=add_neighbour_losses,
-                neighbour_perimeter=room["neighbour_perimeter"],
-                room_type=room["room_type"],
+                neighbour_perimeter=row.get("Neighbour Perimeter (m)", 0.0),
+                room_type=row["Room Type"],
                 wall_height=wall_height,
+                wall_outside=row.get("Walls external", 0),
+                wall_neighbor=row.get("Walls internal", 0),
                 return_detail=return_detail
             )
             result = calculator.compute()
-            # for the multi-room show in a table for every room the heat loss and give the total heat loss building
             if return_detail:
-                st.subheader("Total Heat Loss")
-                st.write(f"{result['totalHeatLoss']:.2f} W")
-                st.subheader("Detailed Heat Loss Breakdown")
-                st.bar_chart(data={
-                    'Transmission': result['transmissionHeatLoss'],
-                    'Ventilation': result['ventilationHeatLoss'],
-                    'Infiltration': result['infiltrationHeatLoss'],
-                    'Neighbour': result['neighbourLosses']
+                room_results.append({
+                    "Room": row["Room #"],
+                    "Total Heat Loss (W)": result['totalHeatLoss'],
+                    "Transmission Loss (W)": result['transmissionHeatLoss'],
+                    "Ventilation Loss (W)": result['ventilationHeatLoss'],
+                    "Infiltration Loss (W)": result['infiltrationHeatLoss'],
+                    "Neighbour Loss (W)": result['neighbourLosses']
                 })
             else:
-                st.subheader("Total Heat Loss")
-                st.write(f"{result:.2f} W")
+                room_results.append({
+                    "Room": row["Room #"],
+                    "Total Heat Loss (W)": result
+                })
+
+        df_results = pd.DataFrame(room_results)
+        st.subheader("Heat Loss Results")
+        st.dataframe(df_results)
 
 
 if __name__ == "__main__":
