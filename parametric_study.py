@@ -1,14 +1,14 @@
 import json
-from typing import Dict
+from typing import Dict, List, Tuple
 import plotly.graph_objs as go
 
 from simpleLoadModel import RoomLoadCalculator
 
+# Load building data
 with open('buildings.json') as data:
     building_data = json.load(data)
 
 
-# Function to perform heat loss calculation for each room
 def perform_parametric_study(building: Dict[str, any], room: Dict[str, any]) -> Dict[str, float]:
     building_params = building['building_params'][0]
     calculator = RoomLoadCalculator(
@@ -29,112 +29,56 @@ def perform_parametric_study(building: Dict[str, any], room: Dict[str, any]) -> 
         room_type=room.get('room_type', None)
     )
 
-    # Calculate heat loss using 'fromFloorArea'
-    calculator.heat_loss_area_estimation = 'fromFloorArea'
-    heat_loss_floor_area = calculator.compute()
-
-    # Calculate heat loss using 'fromExposedPerimeter'
-    calculator.heat_loss_area_estimation = 'fromExposedPerimeter'
-    heat_loss_exposed_perimeter = calculator.compute()
-
-    calculator.heat_loss_area_estimation = 'fromFloorArea'
-    calculator.ventilation_calculation_method = 'NBN-D-50-001'
-    ventilation_nbn = calculator.compute()
-
-    calculator.window = True
-    calculator.heat_loss_area_estimation = 'fromFloorArea'
-    calculator.u_glass = building_params['u_glass']
-    calculator.ventilation_calculation_method = 'simple'
-    window = calculator.compute()
+    # Helper function to calculate heat loss
+    def calculate_heat_loss(heat_loss_area_estimation: str, ventilation_calculation_method: str = None, window: bool = False) -> float:
+        calculator.heat_loss_area_estimation = heat_loss_area_estimation
+        if ventilation_calculation_method:
+            calculator.ventilation_calculation_method = ventilation_calculation_method
+        if window:
+            calculator.window = True
+            calculator.u_glass = building_params['u_glass']
+        return calculator.compute()
 
     return {
-        'heat_loss_floor_area': heat_loss_floor_area,
-        'heat_loss_exposed_perimeter': heat_loss_exposed_perimeter,
-        'ventilation_NBN': ventilation_nbn,
-        'windows': window
-
+        'heat_loss_floor_area': calculate_heat_loss('fromFloorArea'),
+        'heat_loss_exposed_perimeter': calculate_heat_loss('fromExposedPerimeter'),
+        'ventilation_NBN': calculate_heat_loss('fromFloorArea', 'NBN-D-50-001'),
+        'windows': calculate_heat_loss('fromFloorArea', 'simple', True)
     }
 
 
-# Prepare data for plotting
-def prepare_plot_data(building_name, building_data):
-    floor_area_losses = []
-    exposed_perimeter_losses = []
-    detailed_losses18 = []
-    detailed_losses10 = []
-    ventilation_nbn = []
-    windows = []
-    room_names = []
+def prepare_plot_data(building_data: dict) -> Tuple[List[str], List[float], List[float], List[float], List[float], List[float], List[float]]:
+    room_names = [f"{room['room_type'].capitalize()} {i + 1}" for i, room in enumerate(building_data['rooms'])]
+    heat_losses = [perform_parametric_study(building_data, room) for room in building_data['rooms']]
 
-    for i, room in enumerate(building_data['rooms']):
-        heat_losses = perform_parametric_study(building_data, room)
-        room_name = f"{room['room_type'].capitalize()} {i + 1}"
+    floor_area_losses = [losses['heat_loss_floor_area'] for losses in heat_losses]
+    exposed_perimeter_losses = [losses['heat_loss_exposed_perimeter'] for losses in heat_losses]
+    ventilation_nbn = [losses['ventilation_NBN'] for losses in heat_losses]
+    windows = [losses['windows'] for losses in heat_losses]
 
-        floor_area_losses.append(heat_losses['heat_loss_floor_area'])
-        exposed_perimeter_losses.append(heat_losses['heat_loss_exposed_perimeter'])
-        detailed_losses18.append(
-            building_data['heat_losses_detailed'][i]['neighbor18'])
-        detailed_losses10.append(
-            building_data['heat_losses_detailed'][i]['neighbor10'])
-        room_names.append(room_name)
-        ventilation_nbn.append(heat_losses["ventilation_NBN"])
-        windows.append(heat_losses["windows"])
+    detailed_losses18 = [building_data['heat_losses_detailed'][i]['neighbor18'] for i in range(len(building_data['rooms']))]
+    detailed_losses10 = [building_data['heat_losses_detailed'][i]['neighbor10'] for i in range(len(building_data['rooms']))]
 
     return room_names, floor_area_losses, exposed_perimeter_losses, detailed_losses18, detailed_losses10, ventilation_nbn, windows
 
 
-# Generate plots for each building
-for building_name, building_data in building_data.items():
-    room_names, floor_area_losses, exposed_perimeter_losses, detailed_losses18, detailed_losses10, ventilation_nbn, windows = prepare_plot_data(building_name,
-                                                                                                 building_data)
+def generate_plots(building_name: str, building_data: Dict[str, any]):
+    room_names, floor_area_losses, exposed_perimeter_losses, detailed_losses18, detailed_losses10, ventilation_nbn, windows = prepare_plot_data(building_data)
 
-    # Create the bar plot
     fig = go.Figure()
 
-    # Add bars for each heat loss estimation method
-    fig.add_trace(go.Bar(
-        x=room_names,
-        y=floor_area_losses,
-        name='From Floor Area',
-        marker_color='indianred'
-    ))
+    data = [
+        ('From Floor Area', floor_area_losses, 'indianred'),
+        ('From Exposed Perimeter', exposed_perimeter_losses, 'lightblue'),
+        ('Detailed Heat Loss18', detailed_losses18, 'green'),
+        ('Detailed Heat Loss10', detailed_losses10, 'yellow'),
+        ('Ventilation NBN', ventilation_nbn, 'purple'),
+        ('Windows', windows, 'orange')
+    ]
 
-    fig.add_trace(go.Bar(
-        x=room_names,
-        y=exposed_perimeter_losses,
-        name='From Exposed Perimeter',
-        marker_color='lightblue'
-    ))
+    for name, y_values, color in data:
+        fig.add_trace(go.Bar(x=room_names, y=y_values, name=name, marker_color=color))
 
-    fig.add_trace(go.Bar(
-        x=room_names,
-        y=detailed_losses18,
-        name='Detailed Heat Loss18',
-        marker_color='green'
-    ))
-
-    fig.add_trace(go.Bar(
-        x=room_names,
-        y=detailed_losses10,
-        name='Detailed Heat Loss10',
-        marker_color='yellow'
-    ))
-
-    fig.add_trace(go.Bar(
-        x=room_names,
-        y=ventilation_nbn,
-        name='ventilation_NBN',
-        marker_color='purple'
-    ))
-
-    fig.add_trace(go.Bar(
-        x=room_names,
-        y=windows,
-        name='windows',
-        marker_color='orange'
-    ))
-
-    # Update layout
     fig.update_layout(
         title=f"Heat Loss Comparison for {building_name.capitalize()}",
         xaxis=dict(title='Rooms'),
@@ -142,5 +86,8 @@ for building_name, building_data in building_data.items():
         barmode='group'
     )
 
-    # Show plot
     fig.show()
+
+
+for building_name, data in building_data.items():
+    generate_plots(building_name, data)

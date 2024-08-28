@@ -112,7 +112,7 @@ def test_glass_calculator():
     vSystem = 'C'
     u_glass = 1
 
-    result = 597.23 + (17.07 * 0.1* 1 * 27) - (17.07 * 0.1 * 0.24 *27)
+    result = 597.23 + (17.07 * 0.1 * 1 * 27) - (17.07 * 0.1 * 0.24 *27)
     test1 = RoomLoadCalculator(floor_area=floorArea, uw=Uw, u_roof=Uroof, u_ground=Uground, v_system=vSystem, v50=v50,
                                tin=Tin, tout=Tout,
                                neighbour_t=18,
