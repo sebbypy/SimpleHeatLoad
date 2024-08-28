@@ -46,7 +46,6 @@ def main():
             "Indoor Temp (°C)": [20.0] * num_rooms,
             "Floor Area (m²)": [50.0] * num_rooms,
             "Walls external": [2] * num_rooms,
-            "Walls internal": [2] * num_rooms,
             "Room Type": ["Living"] * num_rooms,
             "On Ground": [False] * num_rooms,
             "Under Roof": [False] * num_rooms
@@ -67,21 +66,20 @@ def main():
     edited_room_data = st.data_editor(
         room_data,
         key='editable_table',
-        num_rows="dynamic",
         use_container_width=True,
+        hide_index=True,
         column_config={
-            'Room #': st.column_config.NumberColumn("Room #", format="%d", width=100),
-            'Indoor Temp (°C)': st.column_config.NumberColumn("Indoor Temp (°C)", format="%.1f", width=150),
-            'Floor Area (m²)': st.column_config.NumberColumn("Floor Area (m²)", format="%.2f", width=150),
-            'Exposed Perimeter (m)': st.column_config.NumberColumn("Exposed Perimeter (m)", format="%.2f", width=150),
-            'Neighbour Perimeter (m)': st.column_config.NumberColumn("Neighbour Perimeter (m)", format="%.2f",
-                                                                     width=150),
-            'Room Type': st.column_config.SelectboxColumn("Room Type",
-                                                          options=room_type, width=150),
-            'On Ground': st.column_config.CheckboxColumn("On Ground", width=100),
-            'Under Roof': st.column_config.CheckboxColumn("Under Roof", width=100),
-            'Walls external': st.column_config.NumberColumn("Walls external", format="%.2f", width=150, min_value=0.0, max_value=4.0, step=1.0),
-            'Walls internal': st.column_config.NumberColumn("Walls internal", format="%.2f", width=150, min_value=0.0, max_value=4.0, step=1.0),
+            'Room #': st.column_config.NumberColumn("Room", format="%d", width="small"),
+            'Indoor Temp (°C)': st.column_config.NumberColumn('T indoor (°C)', format="%.1f"),
+            'Floor Area (m²)': st.column_config.NumberColumn('Floor A (m²)', format="%.2f"),
+            'Exposed Perimeter (m)': st.column_config.NumberColumn("Exposed Perimeter (m)", format="%.2f"),
+            'Neighbour Perimeter (m)': st.column_config.NumberColumn("Neighbour Perimeter (m)", format="%.2f"),
+            'Room Type': st.column_config.SelectboxColumn("Type",
+                                                          options=room_type),
+            'On Ground': st.column_config.CheckboxColumn("On Ground"),
+            'Under Roof': st.column_config.CheckboxColumn("Under Roof"),
+            'Walls external': st.column_config.NumberColumn("Walls outdoor", format="%.2f",
+                                                            min_value=0.0, max_value=4.0, step=1.0),
         }
     )
     if st.sidebar.button("Calculate Heat Loss for All Rooms"):
@@ -109,7 +107,6 @@ def main():
                 room_type=row["Room Type"],
                 wall_height=wall_height,
                 wall_outside=row.get("Walls external", 0),
-                wall_neighbor=row.get("Walls internal", 0),
                 return_detail=return_detail
             )
             result = calculator.compute()
@@ -130,7 +127,7 @@ def main():
 
         df_results = pd.DataFrame(room_results)
         st.subheader("Heat Loss Results")
-        st.dataframe(df_results)
+        st.dataframe(df_results, hide_index=True)
 
 
 if __name__ == "__main__":
