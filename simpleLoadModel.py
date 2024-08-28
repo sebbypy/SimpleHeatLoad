@@ -3,6 +3,7 @@ import dataclasses
 import numpy as np
 from typing import Dict, Union, Optional
 
+
 @dataclasses.dataclass
 class RoomLoadCalculator:
     floor_area: float
@@ -11,16 +12,17 @@ class RoomLoadCalculator:
     u_ground: float
     v_system: str
     wall_outside: float = 2.0
-    wall_neighbor: float = 2.0
     v50: float = 6.0
     tin: float = 20.0
     tout: float = -7.0
     neighbour_t: float = 18.0
     un: float = 1.0
+    u_glass: float = 1.0
     lir: float = 0.2
     heat_loss_area_estimation: str = 'fromFloorArea'
     ventilation_calculation_method: str = 'simple'
     exposed_perimeter: float = 0.0
+    window: bool = False
     on_ground: bool = False
     under_roof: bool = False
     add_neighbour_losses: bool = False
@@ -52,6 +54,10 @@ class RoomLoadCalculator:
                                          wall_heat_loss_area * self.uw + roof_heat_loss_area * self.u_roof +
                                          ground_heat_loss_area * self.u_ground
                                  ) * delta_t
+        if self.window:
+            transmission_heat_loss += (wall_heat_loss_area * 0.1 * self.u_glass) * delta_t
+            # substract 10% of wall loss otherwise we add glass to wall
+            transmission_heat_loss -= (wall_heat_loss_area * 0.1 * self.uw) * delta_t
 
         total_heat_loss = transmission_heat_loss + ventilation_heat_loss + infiltration_heat_loss + neighbour_losses
 
@@ -84,8 +90,9 @@ class RoomLoadCalculator:
     def compute_heat_loss_areas(self) -> Dict[str, float]:
         if self.heat_loss_area_estimation == 'fromFloorArea':
             side = np.sqrt(self.floor_area)
+            wall_neighbor = 4.0 - self.wall_outside
             wall_heat_loss_area = side * self.wall_height * self.wall_outside
-            neighbour_wall_area = side * self.wall_height * self.wall_neighbor
+            neighbour_wall_area = side * self.wall_height * wall_neighbor
         elif self.heat_loss_area_estimation == 'fromExposedPerimeter':
             wall_heat_loss_area = self.exposed_perimeter * self.wall_height
             neighbour_wall_area = self.neighbour_perimeter * self.wall_height
@@ -122,9 +129,11 @@ class RoomLoadCalculator:
             'Living': {'min': 75, 'max': 150},
             'Kitchen': {'min': 50, 'max': 75},
             'Bedroom': {'min': 25, 'max': 72},
+            'Study': {'min': 25, 'max': 72},
             'Laundry': {'min': 50, 'max': 75},
             'Bathroom': {'min': 50, 'max': 150},
             'Toilet': {'min': 25, 'max': 25},
+            'Halway': {'min': 0, 'max': 75},
             None: {'min': 0, 'max': 150},
         }
 

@@ -71,7 +71,7 @@ def test_multiple_room(load_test_data):
     Uroof = 0.24
     Uground = 0.7
     Un = 2
-    v50 = 1
+    v50 = 6
     Tout = -7
     Tneighbour = 18
     vSystem = 'C'
@@ -98,4 +98,33 @@ def test_multiple_room(load_test_data):
 
         result = calculator.compute()
         total_heat_loss += float(result)
-    assert pytest.approx(total_heat_loss, rel=1e-2) == 4409.72
+    assert pytest.approx(total_heat_loss, rel=1e-2) == 6400.74
+
+
+def test_glass_calculator():
+    floorArea = 10
+    Uw = 0.24
+    Uroof = 0.24
+    Uground = 0.7
+    v50 = 1
+    Tin = 20
+    Tout = -7
+    vSystem = 'C'
+    u_glass = 1
+
+    result = 597.23 + (17.07 * 0.1* 1 * 27) - (17.07 * 0.1 * 0.24 *27)
+    test1 = RoomLoadCalculator(floor_area=floorArea, uw=Uw, u_roof=Uroof, u_ground=Uground, v_system=vSystem, v50=v50,
+                               tin=Tin, tout=Tout,
+                               neighbour_t=18,
+                               lir=0.2,
+                               window=True,
+                               u_glass=u_glass,
+                               heat_loss_area_estimation='fromFloorArea',
+                               exposed_perimeter=0,
+                               on_ground=True,
+                               under_roof=False,
+                               add_neighbour_losses=False,
+                               neighbour_perimeter=0,
+                               room_type=None).compute()
+
+    assert result == pytest.approx(test1, rel=1e-2)
