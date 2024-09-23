@@ -5,16 +5,16 @@
         ],
         "rooms": [
             {"floor_area": 20.7, "tin": 20, "on_ground": true, "under_roof": false, "room_type": "Living", "wall_outside": 1,
-                "exposed_perimeter": 6
+                "exposed_perimeter": 5
             },
             {"floor_area": 21.0, "tin": 20, "on_ground": true, "under_roof": true, "room_type": "Kitchen","wall_outside": 1,
-                "exposed_perimeter": 6},
+                "exposed_perimeter": 5},
             {"floor_area": 11.8, "tin": 24, "on_ground": false, "under_roof": true, "room_type": "Bathroom","wall_outside": 1,
-                "exposed_perimeter": 6},
+                "exposed_perimeter": 5},
             {"floor_area": 16.5, "tin": 20, "on_ground": false, "under_roof": true, "room_type": "Bedroom", "wall_outside": 1,
-                "exposed_perimeter": 6},
-            {"floor_area": 12.5, "tin": 20, "on_ground": false, "under_roof": true, "room_type": "Bedroom", "wall_outside": 1,
-                "exposed_perimeter": 6}
+                "exposed_perimeter": 5},
+            {"floor_area": 12.5, "tin": 20, "on_ground": true, "under_roof": false, "room_type": "Bedroom", "wall_outside": 1,
+                "exposed_perimeter": 5}
         ],
         "heat_losses_detailed": [
             {"neighbor18": 1156, "neighbor10": 1473},
@@ -30,19 +30,19 @@
         ],
         "rooms": [
             {"floor_area": 22.6, "tin": 20, "on_ground": true, "under_roof": false, "room_type": "Living","wall_outside": 1,
-                "exposed_perimeter": 6},
+                "exposed_perimeter": 7},
             {"floor_area": 19.4, "tin": 20, "on_ground": true, "under_roof": false, "room_type": "Kitchen","wall_outside": 1,
-                "exposed_perimeter": 6},
+                "exposed_perimeter": 7},
             {"floor_area": 5.4, "tin": 24, "on_ground": false, "under_roof": false, "room_type": "Bathroom","wall_outside": 1,
-                "exposed_perimeter": 6},
+                "exposed_perimeter": 7},
             {"floor_area": 22.7, "tin": 16, "on_ground": false, "under_roof": false, "room_type": "Bedroom","wall_outside": 1,
-                "exposed_perimeter": 6},
+                "exposed_perimeter": 7},
             {"floor_area": 20, "tin": 18, "on_ground": false, "under_roof": false, "room_type": "Study","wall_outside": 1,
-                "exposed_perimeter": 6},
+                "exposed_perimeter": 7},
             {"floor_area": 20, "tin": 16, "on_ground": false, "under_roof": true, "room_type": "Bedroom", "wall_outside": 1,
-                "exposed_perimeter": 6},
+                "exposed_perimeter": 7},
             {"floor_area": 22.7, "tin": 16, "on_ground": false, "under_roof": true, "room_type": "Bedroom","wall_outside": 1,
-                "exposed_perimeter": 6}
+                "exposed_perimeter": 7}
         ],
         "heat_losses_detailed": [
             {"neighbor18": 1921, "neighbor10": 2100},
@@ -56,23 +56,23 @@
     },
     "halfopen": {
                 "building_params":[
-            {"Uw": 0.28, "Uroof": 0.24, "Uground": 0.7, "Un": 2, "u_glass": 2.66, "v50": 6, "Tout": -7, "Tneighbour": 18, "vSystem": "C"}
+            {"Uw": 0.28, "Uroof": 0.24, "Uground": 0.7, "Un": 2, "u_glass": 2.66, "v50": 3, "Tout": -7, "Tneighbour": 18, "vSystem": "C"}
         ],
         "rooms": [
-            {"floor_area": 50.1, "tin": 20, "on_ground": true, "under_roof": false, "room_type": "Living","wall_outside": 2,
-                "exposed_perimeter": 6},
-            {"floor_area": 14.33, "tin": 20, "on_ground": true, "under_roof": true, "room_type": "Kitchen", "wall_outside": 2,
-                "exposed_perimeter": 6},
-            {"floor_area": 10.33, "tin": 24, "on_ground": false, "under_roof": true, "room_type": "Bathroom", "wall_outside": 2,
-                "exposed_perimeter": 6},
-            {"floor_area": 19.22, "tin": 16, "on_ground": false, "under_roof": true, "room_type": "Bedroom", "wall_outside": 2,
-                "exposed_perimeter": 6},
-            {"floor_area": 19.6, "tin": 16, "on_ground": false, "under_roof": true, "room_type": "Study", "wall_outside": 2,
-                "exposed_perimeter": 6},
-            {"floor_area": 25.5, "tin": 16, "on_ground": false, "under_roof": true, "room_type": "Bedroom", "wall_outside": 2,
-                "exposed_perimeter": 6},
-            {"floor_area": 11.8, "tin": 16, "on_ground": false, "under_roof": true, "room_type": "Halway", "wall_outside": 2,
-                "exposed_perimeter": 6}
+            {"floor_area": 50.1, "tin": 20, "on_ground": true, "under_roof": false, "room_type": "Living","wall_outside": 3,
+                "exposed_perimeter": 13},
+            {"floor_area": 17.25, "tin": 20, "on_ground": true, "under_roof": false, "room_type": "Kitchen", "wall_outside": 2,
+                "exposed_perimeter": 4},
+            {"floor_area": 12, "tin": 24, "on_ground": false, "under_roof": false, "room_type": "Bathroom", "wall_outside": 1,
+                "exposed_perimeter": 7},
+            {"floor_area": 19.22, "tin": 16, "on_ground": false, "under_roof": false, "room_type": "Bedroom", "wall_outside": 1,
+                "exposed_perimeter": 4},
+            {"floor_area": 19.6, "tin": 16, "on_ground": false, "under_roof": false, "room_type": "Study", "wall_outside": 2,
+                "exposed_perimeter": 4},
+            {"floor_area": 25.5, "tin": 16, "on_ground": false, "under_roof": false, "room_type": "Bedroom", "wall_outside": 2,
+                "exposed_perimeter": 8.5},
+            {"floor_area": 11.8, "tin": 16, "on_ground": true, "under_roof": false, "room_type": "Hallway", "wall_outside": 1,
+                "exposed_perimeter": 2}
         ],
         "heat_losses_detailed": [
             {"neighbor18": 4105, "neighbor10": 4237},
@@ -86,35 +86,35 @@
     },
     "vrijstaand": {
                 "building_params":[
-            {"Uw": 0.65, "Uroof": 0.373, "Uground": 0.346, "Un": 2, "u_glass": 2.66, "v50": 6, "Tout": -7, "Tneighbour": 18, "vSystem": "C"}
+            {"Uw": 0.65, "Uroof": 0.373, "Uground": 0.346, "Un": 2, "u_glass": 2.66, "v50": 3, "Tout": -7, "Tneighbour": 18, "vSystem": "C"}
         ],
         "rooms": [
-            {"floor_area": 35.7, "tin": 20, "on_ground": true, "under_roof": false, "room_type": "Living", "wall_outside": 2,
-                "exposed_perimeter": 6},
-            {"floor_area": 10.2, "tin": 20, "on_ground": true, "under_roof": false, "room_type": "Kitchen", "wall_outside": 2,
-                "exposed_perimeter": 6},
-            {"floor_area": 6, "tin": 24, "on_ground": false, "under_roof": false, "room_type": "Bathroom", "wall_outside": 2,
-                "exposed_perimeter": 6},
-            {"floor_area": 17, "tin": 16, "on_ground": false, "under_roof": false, "room_type": "Bedroom", "wall_outside": 2,
-                "exposed_perimeter": 6},
+            {"floor_area": 38.9, "tin": 20, "on_ground": true, "under_roof": false, "room_type": "Living", "wall_outside": 3,
+                "exposed_perimeter": 13.5},
+            {"floor_area": 11.4, "tin": 20, "on_ground": true, "under_roof": false, "room_type": "Kitchen", "wall_outside": 2,
+                "exposed_perimeter": 6.5},
+            {"floor_area": 8, "tin": 24, "on_ground": false, "under_roof": false, "room_type": "Bathroom", "wall_outside": 2,
+                "exposed_perimeter": 5.5},
+            {"floor_area": 16.9, "tin": 16, "on_ground": false, "under_roof": false, "room_type": "Bedroom", "wall_outside": 2,
+                "exposed_perimeter": 6.5},
             {"floor_area": 18.2, "tin": 16, "on_ground": false, "under_roof": false, "room_type": "Bedroom", "wall_outside": 2,
                 "exposed_perimeter": 6},
-            {"floor_area": 13.6, "tin": 16, "on_ground": false, "under_roof": false, "room_type": "Bedroom", "wall_outside": 2,
+            {"floor_area": 13.6, "tin": 16, "on_ground": false, "under_roof": true, "room_type": "Bedroom", "wall_outside": 3,
+                "exposed_perimeter": 13},
+            {"floor_area": 8, "tin": 20, "on_ground": true, "under_roof": false, "room_type": "Bedroom", "wall_outside": 2,
                 "exposed_perimeter": 6},
-            {"floor_area": 8, "tin": 16, "on_ground": false, "under_roof": true, "room_type": "Bedroom", "wall_outside": 2,
-                "exposed_perimeter": 6},
-            {"floor_area": 25, "tin": 16, "on_ground": true, "under_roof": false, "room_type": "Halway", "wall_outside": 2,
-                "exposed_perimeter": 6}
+            {"floor_area": 25, "tin": 20, "on_ground": true, "under_roof": false, "room_type": "Hallway", "wall_outside": 1,
+                "exposed_perimeter": 4}
         ],
         "heat_losses_detailed": [
-            {"neighbor18": 3123, "neighbor10": 3123},
-            {"neighbor18": 1207, "neighbor10": 1207},
-            {"neighbor18": 965, "neighbor10": 965},
-            {"neighbor18": 459, "neighbor10": 459},
-            {"neighbor18": 343, "neighbor10": 343},
-            {"neighbor18": 546, "neighbor10": 546},
+            {"neighbor18": 3308, "neighbor10": 3308},
+            {"neighbor18": 1241, "neighbor10": 1241},
+            {"neighbor18": 950, "neighbor10": 950},
+            {"neighbor18": 548, "neighbor10": 548},
+            {"neighbor18": 428, "neighbor10": 428},
+            {"neighbor18": 611, "neighbor10": 611},
             {"neighbor18": 489, "neighbor10": 489},
-            {"neighbor18": 1599, "neighbor10": 1599}
+            {"neighbor18": 1552, "neighbor10": 1552}
         ]
     }
 }
