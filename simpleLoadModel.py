@@ -16,7 +16,7 @@ class RoomLoadCalculator:
     tin: float = 20.0
     tout: float = -7.0
     neighbour_t: float = 18.0
-    un: float = 1.0
+    un: float = 2.0
     u_glass: float = 1.0
     lir: float = 0.2
     heat_loss_area_estimation: str = 'fromFloorArea'
@@ -55,9 +55,9 @@ class RoomLoadCalculator:
                                          ground_heat_loss_area * self.u_ground
                                  ) * delta_t
         if self.window:
-            transmission_heat_loss += (wall_heat_loss_area * 0.1 * self.u_glass) * delta_t
-            # substract 10% of wall loss otherwise we add glass to wall
-            transmission_heat_loss -= (wall_heat_loss_area * 0.1 * self.uw) * delta_t
+            # assumption 10% of wall is glass surface than substract 10% of wall loss for heat wall as its replaced by glass
+            transmission_heat_loss += (wall_heat_loss_area * 0.2 * self.u_glass) * delta_t
+            transmission_heat_loss -= (wall_heat_loss_area * 0.2 * self.uw) * delta_t
 
         total_heat_loss = transmission_heat_loss + ventilation_heat_loss + infiltration_heat_loss + neighbour_losses
 
@@ -133,7 +133,7 @@ class RoomLoadCalculator:
             'Laundry': {'min': 50, 'max': 75},
             'Bathroom': {'min': 50, 'max': 150},
             'Toilet': {'min': 25, 'max': 25},
-            'Halway': {'min': 0, 'max': 75},
+            'Hallway': {'min': 0, 'max': 75},
             None: {'min': 0, 'max': 150},
         }
 
