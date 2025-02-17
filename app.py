@@ -13,6 +13,7 @@ def main():
         u_roof = st.number_input("Roof U-value (W/m²K)", min_value=0.0, value=0.2, help="U-value of the roof.")
         u_ground = st.number_input("Ground U-value (W/m²K)", min_value=0.0, value=0.3,
                                    help="U-value of the ground floor.")
+        u_glass = st.number_input("Glazing U-value (W/m²K)", min_value=0.0, value=0.2, help="U-value of the glazing.")
         tout = st.number_input("Outdoor Temperature (°C)", value=-7.0,
                                help="Outdoor temperature during heating season.")
         heat_loss_area_estimation = st.selectbox("Heat Loss Area Estimation",
@@ -107,7 +108,9 @@ def main():
                 room_type=row["Room Type"],
                 wall_height=wall_height,
                 wall_outside=row.get("Walls external", 0),
-                return_detail=return_detail
+                return_detail=return_detail,
+                window=True,
+                u_glass=u_glass
             )
             result = calculator.compute()
             if return_detail:
