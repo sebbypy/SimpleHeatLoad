@@ -19,12 +19,14 @@ def test_roomload_calculator():
     Tin = 20
     Tout = -7
     vSystem = 'C'
+    wall_outdoor = 2
 
     result = 597.23
     test1 = RoomLoadCalculator(floor_area=floorArea, uw=Uw, u_roof=Uroof, u_ground=Uground, v_system=vSystem, v50=v50,
                                tin=Tin, tout=Tout,
                                neighbour_t=18,
                                lir=0.2,
+                               wall_outside=wall_outdoor,
                                heat_loss_area_estimation='fromFloorArea',
                                exposed_perimeter=0,
                                on_ground=True,
@@ -35,11 +37,12 @@ def test_roomload_calculator():
 
     assert result == pytest.approx(test1, rel=1e-2)
 
-    result = 506.36
+    result = 668.81
     test2 = RoomLoadCalculator(floor_area=floorArea, uw=Uw, u_roof=Uroof, u_ground=Uground, v_system='D', v50=v50,
                                tin=24, tout=Tout,
                                neighbour_t=18,
                                lir=0.2,
+                               wall_outside=wall_outdoor,
                                heat_loss_area_estimation='fromFloorArea',
                                exposed_perimeter=0,
                                on_ground=False,
@@ -50,11 +53,12 @@ def test_roomload_calculator():
 
     assert result == pytest.approx(test2, rel=1e-2)
 
-    result = 576.69
+    result = 766.29
     test3 = RoomLoadCalculator(floor_area=floorArea, uw=Uw, u_roof=Uroof, u_ground=Uground, v_system='D', v50=v50,
                                tin=24, tout=Tout,
                                neighbour_t=18,
                                lir=0.2,
+                               wall_outside=wall_outdoor,
                                heat_loss_area_estimation='fromExposedPerimeter',
                                exposed_perimeter=8,
                                on_ground=False,
@@ -112,13 +116,14 @@ def test_glass_calculator():
     vSystem = 'C'
     u_glass = 1
 
-    result = 597.23 + (17.07 * 0.1 * 1 * 27) - (17.07 * 0.1 * 0.24 *27)
+    result = 667.31
     test1 = RoomLoadCalculator(floor_area=floorArea, uw=Uw, u_roof=Uroof, u_ground=Uground, v_system=vSystem, v50=v50,
                                tin=Tin, tout=Tout,
                                neighbour_t=18,
                                lir=0.2,
                                window=True,
                                u_glass=u_glass,
+                               wall_outside=2,
                                heat_loss_area_estimation='fromFloorArea',
                                exposed_perimeter=0,
                                on_ground=True,
@@ -140,14 +145,16 @@ def test_neighbor():
         Tout = -7
         vSystem = 'C'
         u_glass = 1
+        walls_outside=2
 
-        result = 666.4196705451975
+        result = 735.61
         test1 = RoomLoadCalculator(floor_area=floorArea, uw=Uw, u_roof=Uroof, u_ground=Uground, v_system=vSystem,
                                    v50=v50,
                                    tin=Tin, tout=Tout,
                                    neighbour_t=18,
                                    lir=0.2,
                                    window=True,
+                                   wall_outside=walls_outside,
                                    u_glass=u_glass,
                                    heat_loss_area_estimation='fromFloorArea',
                                    exposed_perimeter=0,
