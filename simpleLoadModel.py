@@ -119,7 +119,7 @@ class RoomLoadCalculator:
         return {'flow from outside': 0, 'flow from neighbour zones': 0}
 
     def simple_ventilation_flows(self) -> Dict[str, float]:
-        ventilation_ach = {'C': 1, 'D': 0.3}
+        ventilation_ach = {'C': 1.0, 'D': 0.3}
         volume = self.floor_area * self.wall_height
         flow = volume * ventilation_ach[self.v_system]
         return {'flow from outside': flow, 'flow from neighbour zones': 0}
