@@ -15,6 +15,7 @@ class RoomLoadCalculator:
     v50: float = 6.0
     tin: float = 20.0
     tout: float = -7.0
+    tattic: float = 10.0
     neighbour_t: float = 18.0
     un: float = 2.0
     u_glass: float = 1.0
@@ -25,6 +26,7 @@ class RoomLoadCalculator:
     window: bool = False
     on_ground: bool = False
     under_roof: bool = False
+    under_insulated_attic: bool = False
     add_neighbour_losses: bool = False
     neighbour_perimeter: float = 0.0
     room_type: Optional[str] = None
@@ -39,6 +41,7 @@ class RoomLoadCalculator:
         neighbour_wall_area = heat_loss_areas['neighbours']
         ground_heat_loss_area = heat_loss_areas['ground']
         roof_heat_loss_area = heat_loss_areas['roof']
+        attic_heat_loss_area = heat_loss_areas['attic']
         neighbour_floor_area = heat_loss_areas['neighbourfloor']
 
         neighbour_losses = self.compute_neighbour_losses(neighbour_wall_area, neighbour_floor_area)
@@ -49,7 +52,7 @@ class RoomLoadCalculator:
         infiltration_heat_loss = 0.34 * self.lir * self.v50 * (
                 wall_heat_loss_area + roof_heat_loss_area + ground_heat_loss_area
         ) * delta_t
-
+        attic_heat_loss = attic_heat_loss_area * (self.tin - self.tattic)
         transmission_heat_loss = (
                                          wall_heat_loss_area * self.uw + roof_heat_loss_area * self.u_roof +
                                          ground_heat_loss_area * self.u_ground
@@ -59,7 +62,7 @@ class RoomLoadCalculator:
             transmission_heat_loss += (wall_heat_loss_area * 0.2 * self.u_glass) * delta_t
             transmission_heat_loss -= (wall_heat_loss_area * 0.2 * self.uw) * delta_t
 
-        total_heat_loss = transmission_heat_loss + ventilation_heat_loss + infiltration_heat_loss + neighbour_losses
+        total_heat_loss = transmission_heat_loss + ventilation_heat_loss + infiltration_heat_loss + neighbour_losses + attic_heat_loss
 
         return self.prepare_return(total_heat_loss, transmission_heat_loss, ventilation_heat_loss,
                                    infiltration_heat_loss, neighbour_losses)
@@ -101,6 +104,7 @@ class RoomLoadCalculator:
 
         ground_heat_loss_area = self.floor_area if self.on_ground else 0
         roof_heat_loss_area = self.floor_area if self.under_roof else 0
+        attic_heat_loss_area = self.floor_area if self.under_insulated_attic else 0
         neighbour_floor_area = 0 if ground_heat_loss_area else self.floor_area
 
         return {
@@ -108,6 +112,7 @@ class RoomLoadCalculator:
             'neighbours': neighbour_wall_area,
             'ground': ground_heat_loss_area,
             'roof': roof_heat_loss_area,
+            'attic': attic_heat_loss_area,
             'neighbourfloor': neighbour_floor_area,
         }
 

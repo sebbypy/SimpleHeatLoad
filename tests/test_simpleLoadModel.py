@@ -165,3 +165,55 @@ def test_neighbor():
                                    room_type=None).compute()
 
         assert result == pytest.approx(test1, rel=1e-2)
+
+
+def test_insulatedattic():
+    floorArea = 10
+    Uw = 0.24
+    Uroof = 0.24
+    Uground = 0.7
+    v50 = 1
+    Tin = 20
+    Tout = -7
+    Tattic = 10
+    vSystem = 'C'
+    u_glass = 1
+    walls_outside = 2
+
+    test1 = RoomLoadCalculator(floor_area=floorArea, uw=Uw, u_roof=Uroof, u_ground=Uground, v_system=vSystem,
+                               v50=v50,
+                               tin=Tin, tout=Tout, tattic=Tattic,
+                               neighbour_t=18,
+                               lir=0.2,
+                               window=True,
+                               wall_outside=walls_outside,
+                               u_glass=u_glass,
+                               heat_loss_area_estimation='fromFloorArea',
+                               exposed_perimeter=0,
+                               on_ground=False,
+                               under_roof=False,
+                               under_insulated_attic=True,
+                               add_neighbour_losses=True,
+                               neighbour_perimeter=0,
+                               room_type=None).compute()
+    result = 668.25
+    assert result == pytest.approx(test1, rel=1e-2)
+
+    test2 = RoomLoadCalculator(floor_area=floorArea, uw=Uw, u_roof=Uroof, u_ground=Uground, v_system=vSystem,
+                               v50=v50,
+                               tin=18, tout=Tout, tattic=Tattic,
+                               neighbour_t=18,
+                               lir=0.2,
+                               window=True,
+                               wall_outside=walls_outside,
+                               u_glass=u_glass,
+                               heat_loss_area_estimation='fromFloorArea',
+                               exposed_perimeter=0,
+                               on_ground=False,
+                               under_roof=False,
+                               under_insulated_attic=True,
+                               add_neighbour_losses=True,
+                               neighbour_perimeter=0,
+                               room_type=None).compute()
+    result = 505.87
+    assert result == pytest.approx(test2, rel=1e-2)
