@@ -19,7 +19,7 @@ class RoomLoadCalculator:
     neighbour_t: float = 18.0
     un: float = 2.0
     u_glass: float = 1.0
-    lir: float = 0.2
+    lir: float = 0.1
     heat_loss_area_estimation: str = 'fromFloorArea'
     ventilation_calculation_method: str = 'simple'
     exposed_perimeter: float = 0.0
@@ -30,7 +30,7 @@ class RoomLoadCalculator:
     add_neighbour_losses: bool = False
     neighbour_perimeter: float = 0.0
     room_type: Optional[str] = None
-    wall_height: float = 2.7
+    wall_height: float = 3.0
     return_detail: bool = False
 
     def compute(self) -> Union[float, Dict[str, float]]:
@@ -43,8 +43,9 @@ class RoomLoadCalculator:
         roof_heat_loss_area = heat_loss_areas['roof']
         attic_heat_loss_area = heat_loss_areas['attic']
         neighbour_floor_area = heat_loss_areas['neighbourfloor']
+        neighbour_ceiling_area = heat_loss_areas['neighbourceiling']
 
-        neighbour_losses = self.compute_neighbour_losses(neighbour_wall_area, neighbour_floor_area)
+        neighbour_losses = self.compute_neighbour_losses(neighbour_wall_area, neighbour_floor_area, neighbour_ceiling_area)
 
         ventilation_flows = self.get_ventilation_flows()
         ventilation_heat_loss = self.compute_ventilation_heat_loss(ventilation_flows, delta_t)
@@ -52,24 +53,29 @@ class RoomLoadCalculator:
         infiltration_heat_loss = 0.34 * self.lir * self.v50 * (
                 wall_heat_loss_area + roof_heat_loss_area + ground_heat_loss_area
         ) * delta_t
-        attic_heat_loss = attic_heat_loss_area * (self.tin - self.tattic)
+        attic_heat_loss = attic_heat_loss_area * self.un * (self.tin - self.tattic)
+
+        bridge = 0.05
         transmission_heat_loss = (
-                                         wall_heat_loss_area * self.uw + roof_heat_loss_area * self.u_roof +
-                                         ground_heat_loss_area * self.u_ground
+                                         wall_heat_loss_area * (self.uw + bridge) +
+                                         roof_heat_loss_area * (self.u_roof + bridge) +
+                                         ground_heat_loss_area * 1.15 * 1.45 * (self.u_ground + bridge)
                                  ) * delta_t
         if self.window:
             # assumption 10% of wall is glass surface than substract 10% of wall loss for heat wall as its replaced by glass
-            transmission_heat_loss += (wall_heat_loss_area * 0.2 * self.u_glass) * delta_t
-            transmission_heat_loss -= (wall_heat_loss_area * 0.2 * self.uw) * delta_t
+            transmission_heat_loss += (wall_heat_loss_area * 0.2 * (self.u_glass + bridge)) * delta_t
+            transmission_heat_loss -= (wall_heat_loss_area * 0.2 * (self.uw + bridge)) * delta_t
 
-        total_heat_loss = transmission_heat_loss + ventilation_heat_loss + infiltration_heat_loss + neighbour_losses + attic_heat_loss
+        total_heat_loss = (transmission_heat_loss + ventilation_heat_loss + infiltration_heat_loss +
+                           neighbour_losses + attic_heat_loss)
 
         return self.prepare_return(total_heat_loss, transmission_heat_loss, ventilation_heat_loss,
-                                   infiltration_heat_loss, neighbour_losses)
+                                   infiltration_heat_loss, neighbour_losses, attic_heat_loss)
 
-    def compute_neighbour_losses(self, neighbour_wall_area: float, neighbour_floor_area: float) -> float:
+    def compute_neighbour_losses(self, neighbour_wall_area: float, neighbour_floor_area: float,
+                                 neighbour_ceiling_area: float) -> float:
         if self.add_neighbour_losses:
-            return self.un * (self.tin - self.neighbour_t) * (neighbour_wall_area + neighbour_floor_area)
+            return self.un * (self.tin - self.neighbour_t) * (neighbour_wall_area + neighbour_floor_area + neighbour_ceiling_area)
         return 0
 
     def compute_ventilation_heat_loss(self, ventilation_flows: Dict[str, float], delta_t: float) -> float:
@@ -79,7 +85,7 @@ class RoomLoadCalculator:
 
     def prepare_return(self, total_heat_loss: float, transmission_heat_loss: float,
                        ventilation_heat_loss: float, infiltration_heat_loss: float,
-                       neighbour_losses: float) -> Union[float, Dict[str, float]]:
+                       neighbour_losses: float, attic_heat_loss: float) -> Union[float, Dict[str, float]]:
         if self.return_detail:
             return {
                 'totalHeatLoss': total_heat_loss,
@@ -87,10 +93,13 @@ class RoomLoadCalculator:
                 'ventilationHeatLoss': ventilation_heat_loss,
                 'infiltrationHeatLoss': infiltration_heat_loss,
                 'neighbourLosses': neighbour_losses,
+                'atticLosses': attic_heat_loss,
             }
         return total_heat_loss
 
     def compute_heat_loss_areas(self) -> Dict[str, float]:
+        e = 0.3
+        gross_area = self.floor_area + 4 * e * np.sqrt(self.floor_area) + 4 * e ** 2
         if self.heat_loss_area_estimation == 'fromFloorArea':
             side = np.sqrt(self.floor_area)
             wall_neighbor = 4.0 - self.wall_outside
@@ -102,10 +111,12 @@ class RoomLoadCalculator:
         else:
             wall_heat_loss_area = neighbour_wall_area = 0
 
-        ground_heat_loss_area = self.floor_area if self.on_ground else 0
-        roof_heat_loss_area = self.floor_area if self.under_roof else 0
-        attic_heat_loss_area = self.floor_area if self.under_insulated_attic else 0
+        ground_heat_loss_area = gross_area if self.on_ground else 0
+        roof_heat_loss_area = gross_area if self.under_roof else 0
+        attic_heat_loss_area = gross_area if self.under_insulated_attic else 0
         neighbour_floor_area = 0 if ground_heat_loss_area else self.floor_area
+        neighbour_ceiling_area = 0 if roof_heat_loss_area or attic_heat_loss_area else self.floor_area
+
 
         return {
             'walls': wall_heat_loss_area,
@@ -114,6 +125,7 @@ class RoomLoadCalculator:
             'roof': roof_heat_loss_area,
             'attic': attic_heat_loss_area,
             'neighbourfloor': neighbour_floor_area,
+            'neighbourceiling': neighbour_ceiling_area,
         }
 
     def get_ventilation_flows(self) -> Dict[str, float]:
@@ -124,7 +136,7 @@ class RoomLoadCalculator:
         return {'flow from outside': 0, 'flow from neighbour zones': 0}
 
     def simple_ventilation_flows(self) -> Dict[str, float]:
-        ventilation_ach = {'C': 1.0, 'D': 0.3}
+        ventilation_ach = {'C': 0.5, 'D': 0.5*0.3}
         volume = self.floor_area * self.wall_height
         flow = volume * ventilation_ach[self.v_system]
         return {'flow from outside': flow, 'flow from neighbour zones': 0}
