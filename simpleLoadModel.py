@@ -56,13 +56,15 @@ class RoomLoadCalculator:
         attic_heat_loss = attic_heat_loss_area * self.un * (self.tin - self.tattic)
 
         bridge = 0.05
-        transmission_heat_loss = (
+        tground = 10
+        transmission_heat_loss = ((
                                          wall_heat_loss_area * (self.uw + bridge) +
-                                         roof_heat_loss_area * (self.u_roof + bridge) +
-                                         ground_heat_loss_area * 1.15 * 1.45 * (self.u_ground + bridge)
-                                 ) * delta_t
+                                         roof_heat_loss_area * (self.u_roof + bridge)
+                                 ) * delta_t +
+                                  (
+                                          ground_heat_loss_area * 1.15 * 1.45 * (self.u_ground + bridge)
+                                          * (self.tin - tground)))
         if self.window:
-            # assumption 10% of wall is glass surface than substract 10% of wall loss for heat wall as its replaced by glass
             transmission_heat_loss += (wall_heat_loss_area * 0.2 * (self.u_glass + bridge)) * delta_t
             transmission_heat_loss -= (wall_heat_loss_area * 0.2 * (self.uw + bridge)) * delta_t
 
@@ -101,7 +103,7 @@ class RoomLoadCalculator:
         e = 0.3
         gross_area = self.floor_area + 4 * e * np.sqrt(self.floor_area) + 4 * e ** 2
         if self.heat_loss_area_estimation == 'fromFloorArea':
-            side = np.sqrt(self.floor_area)
+            side = np.sqrt(gross_area)
             wall_neighbor = 4.0 - self.wall_outside
             wall_heat_loss_area = side * self.wall_height * self.wall_outside
             neighbour_wall_area = side * self.wall_height * wall_neighbor
